@@ -8,7 +8,11 @@ import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -28,20 +32,11 @@ import br.com.record.lgpd.exceptions.ViolacaoDeArgumentosDeInicializacaoDoConstr
  */
 @Entity
 @Table(name = "\"LGPD_SERVIDOR\"", indexes = { @Index(name = "PK_SERVIDOR", columnList = "ID", unique = true),
-		@Index(name = "UNQ_NOME", columnList = "NOME", unique = true),
-		@Index(name = "UNQ_IP", columnList = "ENDERECO_IP", unique = true) } /*
-																				 * , uniqueConstraints =
-																				 * {@UniqueConstraint(columnNames =
-																				 * {"ENDERECO_IP"}, name =
-																				 * "\"UNQ_ENDERECO_IP\""),
-																				 * 
-																				 * @UniqueConstraint(columnNames =
-																				 * {"NOME"}, name =
-																				 * "\"UNQ_SERVIDOR_ENDERECO_NOME\"") }
-																				 */
+		@Index(name = "UNQ_NOME", columnList = "NOME", unique = true) }
 )
 @NamedQuery(name = "Servidor.encontrePeloNome", query = "SELECT p FROM Servidor p WHERE p.nome = ?1")
-@NamedQuery(name = "Servidor.encontrePeloIp", query = "SELECT p FROM Servidor p WHERE p.enderecoIp = ?1")
+@NamedQuery(name = "Servidor.encontrePeloIp", query = "SELECT p FROM Servidor p INNER JOIN EnderecoIp b ON p.enderecoIp = b.id WHERE b.primeiroOcteto = ?1 and b.segundoOcteto = ?2 and b.terceiroOcteto = ?3 and b.quartoOcteto = ?4")
+@NamedQuery(name = "Servidor.encontrePeloNomeOuIp", query = "SELECT p FROM Servidor p INNER JOIN EnderecoIp b ON p.enderecoIp = b.id WHERE p.nome =?5 or (b.primeiroOcteto = ?1 and b.segundoOcteto = ?2 and b.terceiroOcteto = ?3 and b.quartoOcteto = ?4)")
 public final class Servidor extends CalendarManageAble implements Comparable<Servidor>, Comparator<Servidor> {
 	/**
 	 *
@@ -51,20 +46,45 @@ public final class Servidor extends CalendarManageAble implements Comparable<Ser
 	@Column(name = "NOME", nullable = false, insertable = true, updatable = true)
 	private String nome;
 
-	@Column(name = "ENDERECO_IP", nullable = false, insertable = true, updatable = true)
-	private String enderecoIp;
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "ID_IP", nullable = false, referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_ID_IP"))
+	private EnderecoIp enderecoIp;
 
 	@OneToMany(mappedBy = "servidor", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Collection<ServicoDeBD> servicos;
+	private Collection<Instancia> servicos;
 
 	/**
 	 * @author Fagner Oliveida da Silva
 	 */
 	protected Servidor() {
 		super();
-		servicos = new TreeSet<ServicoDeBD>();
+		servicos = new TreeSet<Instancia>();
 	}
 
+	/**
+	 * @param nome       - nome do servidor.
+	 * @param enderecoIp - endereco IP do servidor.
+	 * @author Fagner Oliveida da Silva
+	 */
+	public Servidor(@NotNull String nome, @NotNull EnderecoIp enderecoIp)
+			throws ViolacaoDeArgumentosDeInicializacaoDoConstrutor {
+		this();
+		ArrayList<String> argumentos = new ArrayList<String>();
+		if (nome == null || nome.isEmpty()) {
+			argumentos.add("nome");
+		}
+		if (enderecoIp == null ) {
+			argumentos.add("enderecoIp");
+		}
+		if (argumentos.isEmpty()) {
+			this.nome = nome;
+			this.enderecoIp = enderecoIp;
+			this.servicos = new TreeSet<Instancia>();
+		} else {
+			throw new ViolacaoDeArgumentosDeInicializacaoDoConstrutor(argumentos, Servidor.class);
+		}
+	}
+	
 	/**
 	 * @param nome       - nome do servidor.
 	 * @param enderecoIp - endereco IP do servidor.
@@ -77,13 +97,13 @@ public final class Servidor extends CalendarManageAble implements Comparable<Ser
 		if (nome == null || nome.isEmpty()) {
 			argumentos.add("nome");
 		}
-		if (enderecoIp == null || enderecoIp.isEmpty()) {
+		if (enderecoIp == null ) {
 			argumentos.add("enderecoIp");
 		}
 		if (argumentos.isEmpty()) {
 			this.nome = nome;
-			this.enderecoIp = enderecoIp;
-			this.servicos = new TreeSet<ServicoDeBD>();
+			this.enderecoIp = new EnderecoIp(enderecoIp);
+			this.servicos = new TreeSet<Instancia>();
 		} else {
 			throw new ViolacaoDeArgumentosDeInicializacaoDoConstrutor(argumentos, Servidor.class);
 		}
@@ -92,18 +112,33 @@ public final class Servidor extends CalendarManageAble implements Comparable<Ser
 	/**
 	 * @return o enderecoIP do servidor.
 	 */
-	public String getEnderecoIP() {
+	public EnderecoIp getEnderecoIP() {
 		return enderecoIp;
+	}
+
+	/**
+	 * @return o enderecoIP do servidor.
+	 */
+	public String getIpToString() {
+		return enderecoIp.getIpToString();
 	}
 
 	/**
 	 * @param enderecoIp the enderecoIP to set
 	 */
-	public void setEnderecoIP(@NotNull String enderecoIp) {
+	public void setEnderecoIP(@NotNull EnderecoIp enderecoIp) {
 		this.enderecoIp = enderecoIp;
 		atualiza();
 	}
 
+	/**
+	 * @param enderecoIp the enderecoIP to set
+	 */
+	public void setEnderecoIPComParse(@NotNull String enderecoIp) {
+		this.enderecoIp = new EnderecoIp(enderecoIp);
+		atualiza();
+	}
+	
 	/**
 	 * @return nome atribuído ao servidor.
 	 */
@@ -122,35 +157,35 @@ public final class Servidor extends CalendarManageAble implements Comparable<Ser
 	/**
 	 * @return the servicos
 	 */
-	public Collection<ServicoDeBD> getServicos() {
+	public Collection<Instancia> getServicos() {
 		return servicos;
 	}
 
 	/**
 	 * @param servicos the servicos to set
 	 */
-	public void setServicos(Collection<ServicoDeBD> servicos) {
+	public void setServicos(Collection<Instancia> servicos) {
 		this.servicos = servicos;
 		atualiza();
 	}
 
-	public void adicionaServico(@NotNull ServicoDeBD servico) {
+	public void adicionaServico(@NotNull Instancia servico) {
 		if (null != servico) {
 			servico.setServidor(this);
 			servicos.add(servico);
 		}
 	}
 
-	public void removeServico(@NotNull ServicoDeBD servico) {
+	public void removeServico(@NotNull Instancia servico) {
 		if (null != servico) {
 			servicos.remove(servico);
 		}
 	}
 
-	public ServicoDeBD getServico(@NotNull String nome) {
-		ServicoDeBD servico = null;
+	public Instancia getServico(@NotNull String nome) {
+		Instancia servico = null;
 		if(!servicos.isEmpty()) {
-			for (ServicoDeBD servicoDeBD : servicos) {
+			for (Instancia servicoDeBD : servicos) {
 				if (null != servicoDeBD) {
 					if(servicoDeBD.getNome().equals(nome)) {
 						servico = servicoDeBD;

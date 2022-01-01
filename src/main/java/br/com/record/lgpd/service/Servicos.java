@@ -6,31 +6,32 @@ import java.util.HashSet;
 
 import br.com.record.lgpd.model.EnumSGBD;
 
-public class ServicoDeBD implements Serializable {
+public class Servicos implements Serializable {
 	
     private static final long serialVersionUID = 1L;
 
-    private br.com.record.lgpd.model.Servidor servidor;
+    private String nomeDoServidor;
+    private String enderecoIp;
 	private EnumSGBD sgbdEnum;
     private Collection<String> catalogo = new HashSet<>();
-    private String nome;
+    private String nomeDoServico;
     private String porta;
 	
-    public ServicoDeBD() {
+    public Servicos() {
 	}
 
 	/**
 	 * @return the servidor
 	 */
-	public br.com.record.lgpd.model.Servidor getServidor() {
-		return servidor;
+	public String getEnderecoIp() {
+		return enderecoIp;
 	}
 
 	/**
-	 * @param servidor the servidor to set
+	 * @param ip to set
 	 */
-	public void setServidor(br.com.record.lgpd.model.Servidor servidor) {
-		this.servidor = servidor;
+	public void setEnderecoIp(String ip) {
+		this.enderecoIp = ip;
 	}
 
 	/**
@@ -62,17 +63,31 @@ public class ServicoDeBD implements Serializable {
 	}
 
 	/**
-	 * @return the nome
+	 * @return Retorna o atributo nomeDoServico.
 	 */
-	public String getNome() {
-		return nome;
+	public String getNomeDoServico() {
+		return nomeDoServico;
 	}
 
 	/**
-	 * @param nome the nome to set
+	 * @param nomeDoServico the nome to set
 	 */
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setNomeDoServico(String nomeDoServico) {
+		this.nomeDoServico = nomeDoServico;
+	}
+
+	/**
+	 * @return the nomeDoServidor
+	 */
+	public String getNomeDoServidor() {
+		return nomeDoServidor;
+	}
+
+	/**
+	 * @param String para preencher o atributo nomeDoServidor.
+	 */
+	public void setNomeDoServidor(String nomeDoServidor) {
+		this.nomeDoServidor = nomeDoServidor;
 	}
 
 	/**

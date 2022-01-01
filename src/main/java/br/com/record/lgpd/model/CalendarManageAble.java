@@ -77,7 +77,7 @@ public abstract class CalendarManageAble implements Serializable {
 	public void setDataDeAtualizacao(Calendar dataDeAtualizacao) {
 		this.dataDeAtualizacao = dataDeAtualizacao;
 	}
-
+/*
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -85,7 +85,7 @@ public abstract class CalendarManageAble implements Serializable {
 		result = prime * result + (int) (id ^ (id >>> 32));
 		return result;
 	}
-
+*/
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

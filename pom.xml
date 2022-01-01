@@ -10,7 +10,7 @@
 	</parent>
 
 	<groupId>br.com.havilah.consultoria</groupId>
-	<artifactId>consultio.online.rest</artifactId>
+	<artifactId>lgpd</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>lgpd</name>

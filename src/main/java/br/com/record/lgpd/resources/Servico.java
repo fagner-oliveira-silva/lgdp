@@ -24,63 +24,87 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.record.lgpd.exceptions.ViolacaoDeIntegridade;
 import br.com.record.lgpd.model.BancoDeDados;
+import br.com.record.lgpd.model.EnderecoIp;
 import br.com.record.lgpd.model.JsonDeResposta;
-import br.com.record.lgpd.model.ServicoDeBD;
+import br.com.record.lgpd.model.Instancia;
 import br.com.record.lgpd.model.Servidor;
-import br.com.record.lgpd.repository.IServicoDeBD;
+import br.com.record.lgpd.repository.IInstancia;
 import br.com.record.lgpd.repository.IServidor;
 
 @RestController
 @RequestMapping(value = "/api")
-public class ServicoResource extends Resource<ServicoDeBD> {
+public class Servico extends Resource<Instancia> {
 
 	@Autowired
-	private IServicoDeBD servicos;
+	private IInstancia servicos;
 
 	@Autowired
 	private IServidor servidores;
 
-	private ServicoDeBD servico;
+	private Instancia servico;
 
 	@PostMapping("/lgpd/servico/add")
-	public ResponseEntity<JsonDeResposta> cria(@Valid @RequestBody br.com.record.lgpd.service.ServicoDeBD json) throws ViolacaoDeIntegridade {
+	public ResponseEntity<JsonDeResposta> cria(@Valid @RequestBody br.com.record.lgpd.service.Servicos json) throws ViolacaoDeIntegridade {
 		Servidor servidor = null;
-		statusHttp = HttpStatus.OK;
-		StringBuilder mensagem = new StringBuilder(STRING_SUCESSO);
-		String nome = (json.getServidor().getNome() == null ? "" : json.getServidor().getNome());
-		String ip = (json.getServidor().getEnderecoIP() == null ? "" : json.getServidor().getEnderecoIP());
+		Instancia instanciaNova = new Instancia();
+		Instancia instanciaExistente = new Instancia();
+		statusHttp = null;
+		StringBuilder mensagemDeRetornoDoRequest = new StringBuilder();
+		String nomeDoServidor = (json.getNomeDoServico() == null ? "" : json.getNomeDoServico());
+		String nomeDoServico = (json.getNomeDoServico() == null ? "" : json.getNomeDoServico());
+		String portaDoServico = (json.getPorta() == null ? "" : json.getPorta());
+		String ip = (json.getEnderecoIp() == null ? "" : json.getEnderecoIp());
+		EnderecoIp oIp = new EnderecoIp(ip);
+
 		try {
-			if(nome.isEmpty()) {
+			instanciaExistente = 
+					servicos.encontrePeloNomeOuPortaOuIp( 
+							nomeDoServico, 
+							portaDoServico, 
+							oIp.getPrimeiroOcteto(), 
+							oIp.getSegundoOcteto(), 
+							oIp.getTerceiroOcteto(),
+							oIp.getQuartoOcteto()
+							); 
+			if ( instanciaExistente == null) {
+				instanciaNova.setNome(json.getNomeDoServico());
+				instanciaNova.setporta(json.getPorta());
+				instanciaNova.setSgbd(json.getSgbdEnum());
+				servidor = new Servidor(nomeDoServidor, ip);
+			}
+			if(nomeDoServico.isEmpty()) {
 				if(ip.isEmpty()) {
-					mensagem.trimToSize();
-					mensagem.append("Informe o nome e/ou o ip do servidor!");
+					mensagemDeRetornoDoRequest.trimToSize();
+					mensagemDeRetornoDoRequest.append("Informe o nome e/ou o ip do servidor!");
 					statusHttp = HttpStatus.EXPECTATION_FAILED;
 				} else {
-					servidor = servidores.encontrePeloIp(ip);
+					servidor = servidores.encontrePeloIp(oIp.getPrimeiroOcteto(),oIp.getSegundoOcteto(), oIp.getTerceiroOcteto(), oIp.getQuartoOcteto());
 				}
 			} else {
-				servidor = servidores.encontrePeloNome(nome);
+				servidor = servidores.encontrePeloNomeOuIp(oIp.getPrimeiroOcteto(), oIp.getSegundoOcteto(), oIp.getTerceiroOcteto(), oIp.getQuartoOcteto(), nomeDoServico);
 			}
 			if (servidor != null) {
-				servico = new ServicoDeBD(json.getNome(), json.getPorta(), servidor, json.getSgbdEnum());
+				servico = new Instancia(json.getNomeDoServico(), json.getPorta(), servidor, json.getSgbdEnum());
 				servico.adicionaCatalogo(new BancoDeDados("P12"));
 				for (String nome_bd : json.getCatalogo()) {
 					BancoDeDados bancoDeDados = new BancoDeDados(nome_bd);
 					servico.adicionaCatalogo(bancoDeDados);
 				}
 				servico = servicos.save(servico);
+				statusHttp = HttpStatus.OK;
+				mensagemDeRetornoDoRequest.append(STRING_SUCESSO);
 			} else {
-				mensagem.trimToSize();
-				mensagem.append("Servidor não localizado! Informe");
+				mensagemDeRetornoDoRequest.trimToSize();
+				mensagemDeRetornoDoRequest.append("Servidor não localizado! Informe");
 			}
 		} catch (Exception e) {
 			trataErro(servico, e);
 		}
-		return montaJsonResposta(servico, mensagem.toString(), statusHttp);
+		return montaJsonResposta(servico, mensagemDeRetornoDoRequest.toString(), statusHttp);
 	}
 
 	@PutMapping("/lgpd/servico/upd/{id}")
-	public ResponseEntity<JsonDeResposta> atualiza(@Valid @PathVariable Long id, @Valid @RequestBody ServicoDeBD json)
+	public ResponseEntity<JsonDeResposta> atualiza(@Valid @PathVariable Long id, @Valid @RequestBody Instancia json)
 			throws ViolacaoDeIntegridade {
 		String mensagem = STRING_NAO_ACHEI;
 		statusHttp = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -127,7 +151,7 @@ public class ServicoResource extends Resource<ServicoDeBD> {
 
 	@GetMapping("/lgpd/servico/all")
 	public ResponseEntity<JsonDeResposta> listaTudo() {
-		Collection<ServicoDeBD> lista = new ArrayList<ServicoDeBD>();
+		Collection<Instancia> lista = new ArrayList<Instancia>();
 		HttpStatus statusHttp = HttpStatus.OK;
 		String mensagem = STRING_SUCESSO;
 		lista.addAll(servicos.findAll());
@@ -139,7 +163,7 @@ public class ServicoResource extends Resource<ServicoDeBD> {
 		boolean retorno = false;
 		if (temId(id)) {
 			try {
-				Optional<ServicoDeBD> objetoDeBusca = servicos.findById(id);
+				Optional<Instancia> objetoDeBusca = servicos.findById(id);
 				if (objetoDeBusca.isPresent()) {
 					servico = objetoDeBusca.get();
 					statusHttp = HttpStatus.OK;
@@ -157,9 +181,9 @@ public class ServicoResource extends Resource<ServicoDeBD> {
 	}
 
 	@Override
-	protected void trataErro(ServicoDeBD servico, Exception e) throws ViolacaoDeIntegridade {
+	protected void trataErro(Instancia servico, Exception e) throws ViolacaoDeIntegridade {
 		if (e instanceof SQLIntegrityConstraintViolationException ||
-			e instanceof DataIntegrityViolationException ) {
+				e instanceof DataIntegrityViolationException ) {
 			StringBuilder mensagem = new StringBuilder("");
 			mensagem.append(STRING_NAO_ACHEI);
 			mensagem.append("[ ");
@@ -169,7 +193,7 @@ public class ServicoResource extends Resource<ServicoDeBD> {
 			mensagem.append(" / ");
 			mensagem.append("ServicoDeBD: " + servico.getServidor().toString());
 			mensagem.append(" ]");
-			throw new ViolacaoDeIntegridade(mensagem.toString(), ServicoDeBD.class);
+			throw new ViolacaoDeIntegridade(mensagem.toString(), Instancia.class);
 		}
 	}
 

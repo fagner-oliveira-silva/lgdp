@@ -23,26 +23,32 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.record.lgpd.exceptions.ViolacaoDeIntegridade;
 import br.com.record.lgpd.model.JsonDeResposta;
-import br.com.record.lgpd.model.Servidor;
 import br.com.record.lgpd.repository.IServidor;
 import br.com.record.lgpd.service.Servidores;
 
 @RestController
 @RequestMapping(value = "/api")
-public class ServidorResource extends Resource<Servidor> {
+public class Servidor extends Resource<br.com.record.lgpd.model.Servidor> {
 
 	@Autowired
 	private IServidor repositorio;
 
-	private Servidor servidor = null;
+	private br.com.record.lgpd.model.Servidor servidor = null;
 
 	@PostMapping("/lgpd/servidor/add")
 	public ResponseEntity<JsonDeResposta> cria(@Valid @RequestBody Servidores json) throws ViolacaoDeIntegridade {
-		Servidor servidor = new Servidor(json.getNome(), json.getEnderecoIp());
+		br.com.record.lgpd.model.Servidor servidor = new br.com.record.lgpd.model.Servidor(json.getNome(), json.getEnderecoIp());
 		StringBuilder mensagem = new StringBuilder(STRING_SUCESSO);
 		try {
-			servidor = repositorio.save(servidor);
-			statusHttp = HttpStatus.OK;
+			servidor = repositorio.encontrePeloNomeOuIp(servidor.getEnderecoIP().getPrimeiroOcteto(), servidor.getEnderecoIP().getSegundoOcteto(), servidor.getEnderecoIP().getTerceiroOcteto(), servidor.getEnderecoIP().getQuartoOcteto(), servidor.getNome());
+			if (servidor == null) {
+				servidor = repositorio.save(servidor);
+				statusHttp = HttpStatus.OK;
+			} else {
+				mensagem.delete(0, mensagem.length());
+				mensagem.append("Registro criado anteriormente!");
+				statusHttp = HttpStatus.EXPECTATION_FAILED;
+			}
 		} catch (Exception e) {
 			statusHttp = HttpStatus.EXPECTATION_FAILED;
 			trataErro(servidor, e);
@@ -51,7 +57,7 @@ public class ServidorResource extends Resource<Servidor> {
 	}
 
 	@PutMapping("/lgpd/servidor/upd/{id}")
-	public ResponseEntity<JsonDeResposta> atualiza(@Valid @PathVariable Long id, @Valid @RequestBody Servidor json)
+	public ResponseEntity<JsonDeResposta> atualiza(@Valid @PathVariable Long id, @Valid @RequestBody br.com.record.lgpd.model.Servidor json)
 			throws ViolacaoDeIntegridade {
 		String mensagem = STRING_NAO_ACHEI;
 		statusHttp = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -98,7 +104,7 @@ public class ServidorResource extends Resource<Servidor> {
 
 	@GetMapping("/lgpd/servidor/all")
 	public ResponseEntity<JsonDeResposta> listaTudo() {
-		Collection<Servidor> lista = new ArrayList<Servidor>();
+		Collection<br.com.record.lgpd.model.Servidor> lista = new ArrayList<br.com.record.lgpd.model.Servidor>();
 		HttpStatus statusHttp = HttpStatus.OK;
 		String mensagem = STRING_SUCESSO;
 		lista.addAll(repositorio.findAll());
@@ -109,7 +115,7 @@ public class ServidorResource extends Resource<Servidor> {
 	protected boolean temRegistro(Long id) {
 		boolean retorno = false;
 		if (temId(id)) {
-			Optional<Servidor> objetoDeBusca = repositorio.findById(id);
+			Optional<br.com.record.lgpd.model.Servidor> objetoDeBusca = repositorio.findById(id);
 			if (objetoDeBusca.isPresent()) {
 				servidor = objetoDeBusca.get();
 				statusHttp = HttpStatus.OK;
@@ -133,7 +139,7 @@ public class ServidorResource extends Resource<Servidor> {
 	}
 
 	@Override
-	protected void trataErro(Servidor servidor, Exception e) throws ViolacaoDeIntegridade {
+	protected void trataErro(br.com.record.lgpd.model.Servidor servidor, Exception e) throws ViolacaoDeIntegridade {
 		if (e instanceof SQLIntegrityConstraintViolationException) {
 			StringBuilder mensagem = new StringBuilder("");
 			mensagem.append(STRING_NAO_ACHEI);

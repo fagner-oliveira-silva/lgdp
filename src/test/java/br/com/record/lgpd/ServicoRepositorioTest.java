@@ -16,9 +16,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import br.com.record.lgpd.exceptions.ViolacaoDeArgumentosDeInicializacaoDoConstrutor;
 import br.com.record.lgpd.model.BancoDeDados;
 import br.com.record.lgpd.model.EnumSGBD;
-import br.com.record.lgpd.model.ServicoDeBD;
+import br.com.record.lgpd.model.Instancia;
 import br.com.record.lgpd.model.Servidor;
-import br.com.record.lgpd.repository.IServicoDeBD;
+import br.com.record.lgpd.repository.IInstancia;
 
 /**
  *
@@ -41,7 +41,7 @@ import br.com.record.lgpd.repository.IServicoDeBD;
 public class ServicoRepositorioTest {
 
 	@Autowired
-	private IServicoDeBD repositorio;
+	private IInstancia repositorio;
 
 	@Rule
 	public ExpectedException excessao = ExpectedException.none();
@@ -56,7 +56,7 @@ public class ServicoRepositorioTest {
 		Servidor serverdb = new Servidor(nomeDoServidor, ip);
 
 		try {
-			Assertions.assertThat(new ServicoDeBD(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
+			Assertions.assertThat(new Instancia(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
 		} catch (ViolacaoDeArgumentosDeInicializacaoDoConstrutor e) {
 			Assertions.assertThat(e).isInstanceOf(ViolacaoDeArgumentosDeInicializacaoDoConstrutor.class);
 		}
@@ -72,7 +72,7 @@ public class ServicoRepositorioTest {
 		Servidor serverdb = new Servidor(nomeDoServidor, ip);
 
 		try {
-			Assertions.assertThat(new ServicoDeBD(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
+			Assertions.assertThat(new Instancia(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
 		} catch (ViolacaoDeArgumentosDeInicializacaoDoConstrutor e) {
 			Assertions.assertThat(e).isInstanceOf(ViolacaoDeArgumentosDeInicializacaoDoConstrutor.class);
 		}
@@ -88,7 +88,7 @@ public class ServicoRepositorioTest {
 		Servidor serverdb = new Servidor(nomeDoServidor, ip);
 
 		try {
-			Assertions.assertThat(new ServicoDeBD(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
+			Assertions.assertThat(new Instancia(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
 		} catch (ViolacaoDeArgumentosDeInicializacaoDoConstrutor e) {
 			Assertions.assertThat(e).isInstanceOf(ViolacaoDeArgumentosDeInicializacaoDoConstrutor.class);
 		}
@@ -104,7 +104,7 @@ public class ServicoRepositorioTest {
 		Servidor serverdb = new Servidor(nomeDoServidor, ip);
 
 		try {
-			Assertions.assertThat(new ServicoDeBD(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
+			Assertions.assertThat(new Instancia(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
 		} catch (ViolacaoDeArgumentosDeInicializacaoDoConstrutor e) {
 			Assertions.assertThat(e).isInstanceOf(ViolacaoDeArgumentosDeInicializacaoDoConstrutor.class);
 		}
@@ -118,7 +118,7 @@ public class ServicoRepositorioTest {
 		Servidor serverdb = null;
 
 		try {
-			Assertions.assertThat(new ServicoDeBD(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
+			Assertions.assertThat(new Instancia(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER)).isNull();
 		} catch (ViolacaoDeArgumentosDeInicializacaoDoConstrutor e) {
 			Assertions.assertThat(e).isInstanceOf(ViolacaoDeArgumentosDeInicializacaoDoConstrutor.class);
 		}
@@ -137,7 +137,7 @@ public class ServicoRepositorioTest {
 
 		Servidor serverdb = new Servidor(nomeDoServidor, ip);
 
-		ServicoDeBD sqlServer = new ServicoDeBD(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER);
+		Instancia sqlServer = new Instancia(nomeDoServico, porta, serverdb, EnumSGBD.SQLSERVER);
 
 		serverdb.adicionaServico(sqlServer);
 
@@ -170,8 +170,8 @@ public class ServicoRepositorioTest {
 
 		Servidor serverdb = new Servidor(nomeDoServidor, ip);
 
-		ServicoDeBD sqlServer = new ServicoDeBD(nomeDoServico1, porta1, serverdb, EnumSGBD.SQLSERVER);
-		ServicoDeBD mySql = new ServicoDeBD(nomeDoServico2, porta2, serverdb, EnumSGBD.MYSQL);
+		Instancia sqlServer = new Instancia(nomeDoServico1, porta1, serverdb, EnumSGBD.SQLSERVER);
+		Instancia mySql = new Instancia(nomeDoServico2, porta2, serverdb, EnumSGBD.MYSQL);
 
 		sqlServer.adicionaCatalogo(bdP12);
 		sqlServer.adicionaCatalogo(bdIntegracao);
@@ -188,10 +188,10 @@ public class ServicoRepositorioTest {
 		Long idSqlServer = sqlServer.getId();
 		Long idMySql = mySql.getId();
 
-		Optional<ServicoDeBD> resultado = repositorio.findById(idSqlServer);
+		Optional<Instancia> resultado = repositorio.findById(idSqlServer);
 		Assertions.assertThat(resultado.isPresent()).isTrue();
 		
-		ServicoDeBD busca = resultado.get();
+		Instancia busca = resultado.get();
 		
 		Assertions.assertThat(sqlServer.getId()).isNotNull();
 		Assertions.assertThat(sqlServer.getNome()).isEqualTo(nomeDoServico1);

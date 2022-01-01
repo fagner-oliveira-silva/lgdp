@@ -20,20 +20,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.record.lgpd.model.Aplicacao;
 import br.com.record.lgpd.model.JsonDeResposta;
 import br.com.record.lgpd.repository.IAplicacao;
 
 @RestController
 @RequestMapping(value = "/api")
-public class AplicacaoResource {
+public class Aplicacao {
 
 	@Autowired
 	private IAplicacao repositorio;
 
 	@GetMapping("/lgpd/aplicacao/{id}")
-	public ResponseEntity<Optional<Aplicacao>> busca(@Valid @PathVariable Long id) {
-		Optional<Aplicacao> resultado = repositorio.findById(id);
+	public ResponseEntity<Optional<br.com.record.lgpd.model.Aplicacao>> busca(@Valid @PathVariable Long id) {
+		Optional<br.com.record.lgpd.model.Aplicacao> resultado = repositorio.findById(id);
 		if (resultado == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -41,7 +40,7 @@ public class AplicacaoResource {
 	}
 
 	@PostMapping("/lgpd/aplicacao/add")
-	public Aplicacao cria(@Valid @RequestBody Aplicacao aplicacao) {
+	public br.com.record.lgpd.model.Aplicacao cria(@Valid @RequestBody br.com.record.lgpd.model.Aplicacao aplicacao) {
 		try {
 			aplicacao = repositorio.save(aplicacao);
 		}
@@ -52,10 +51,10 @@ public class AplicacaoResource {
 	}
 
 	@PutMapping("/lgpd/aplicacao/upd/{id}")
-	public ResponseEntity<JsonDeResposta> atualiza(@Valid @RequestBody Aplicacao aplicacao) {
+	public ResponseEntity<JsonDeResposta> atualiza(@Valid @RequestBody br.com.record.lgpd.model.Aplicacao aplicacao) {
 		Long id = aplicacao.getId();
 		String mensagem = "Objeto json inválido!";
-		Optional<Aplicacao> objetoDeBusca;
+		Optional<br.com.record.lgpd.model.Aplicacao> objetoDeBusca;
 		HttpStatus statusHttp = HttpStatus.BAD_REQUEST;
 		if (id != null) {
 			objetoDeBusca = repositorio.findById(id);
@@ -82,8 +81,8 @@ public class AplicacaoResource {
 	}
 
 	@DeleteMapping("/lgpd/aplicacao/del/{id}")
-	public ResponseEntity<Aplicacao> deleta(@Valid @PathVariable Long id) {
-		Optional<Aplicacao> resultado = repositorio.findById(id);
+	public ResponseEntity<br.com.record.lgpd.model.Aplicacao> deleta(@Valid @PathVariable Long id) {
+		Optional<br.com.record.lgpd.model.Aplicacao> resultado = repositorio.findById(id);
 		if (resultado == null) {
 			return ResponseEntity.notFound().build();
 		} else {
@@ -93,9 +92,9 @@ public class AplicacaoResource {
 	}
 
 	@GetMapping("/lgpd/aplicacao/all")
-	public ResponseEntity<List<Aplicacao>> listaTudo() {
+	public ResponseEntity<List<br.com.record.lgpd.model.Aplicacao>> listaTudo() {
 		HttpHeaders headers = new HttpHeaders();
-		List<Aplicacao> lista = new ArrayList<Aplicacao>();
+		List<br.com.record.lgpd.model.Aplicacao> lista = new ArrayList<br.com.record.lgpd.model.Aplicacao>();
 		lista.addAll(repositorio.findAll());
 		if (lista.size() == 0) {
 			headers.add("Content-Length", "0");

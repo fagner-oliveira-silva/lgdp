@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import br.com.record.lgpd.exceptions.ViolacaoDeArgumentosDeInicializacaoDoConstrutor;
 import br.com.record.lgpd.model.EnumSGBD;
-import br.com.record.lgpd.model.ServicoDeBD;
+import br.com.record.lgpd.model.Instancia;
 import br.com.record.lgpd.model.Servidor;
 import br.com.record.lgpd.repository.IServidor;
 
@@ -160,7 +160,7 @@ public class ServidorRepositorioTest {
 		Assertions.assertThat(serverdb.getId()).isNotNull();
 		Assertions.assertThat(serverdb.getNome()).isEqualTo(hostname);
 		Assertions.assertThat(serverdb.getEnderecoIP()).isEqualTo(ip);
-		serverdb.setEnderecoIP(ipNovo);
+		serverdb.setEnderecoIPComParse(ipNovo);
 		this.repositorio.save(serverdb);
 		Assertions.assertThat(serverdb.getId()).isNotNull();
 		Assertions.assertThat(serverdb.getNome()).isEqualTo(hostname);
@@ -178,7 +178,7 @@ public class ServidorRepositorioTest {
 
 		Servidor serverdb = new Servidor(hostname, ip);
 
-		ServicoDeBD sqlServer = new ServicoDeBD(nomeDoServico, porta, EnumSGBD.SQLSERVER );
+		Instancia sqlServer = new Instancia(nomeDoServico, porta, EnumSGBD.SQLSERVER );
 
 		serverdb.adicionaServico(sqlServer);
 		

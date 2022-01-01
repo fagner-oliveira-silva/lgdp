@@ -70,7 +70,7 @@ public class Servidores {
 	private boolean preenchido() {
 		boolean retorno = false;
 		if( naoNulo()) {
-			if( ! (servidor.getEnderecoIP().isEmpty() || servidor.getNome().isEmpty()) ) {
+			if( ! (servidor.getIpToString().isEmpty() || servidor.getNome().isEmpty()) ) {
 				retorno = true;
 			}
 		}

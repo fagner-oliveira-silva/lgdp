@@ -15,7 +15,7 @@ import javax.persistence.Table;
  *
  * Havilah Consultoria LTDA
  *
- * Classe de objeto de banco de dados (tabela) que possuem dados sensiveis a
+ * Classe de modelo de dados da entidade Banco de Dados que possuem tabelas com dados sensiveis a
  * LGPD. Utilizada na solução de modelo de dados da aplicação de LGPD.
  *
  * @author Fagner Oliveida da Silva
@@ -35,7 +35,7 @@ public class BancoDeDados extends CalendarManageAble implements Comparable<Banco
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "SERVICO", nullable = false, referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_ID_SERVICO"))
-	private ServicoDeBD servico;
+	private Instancia servico;
 
 	/**
 	 * @param nome - String contendo o nome do banco de dados.
@@ -53,7 +53,7 @@ public class BancoDeDados extends CalendarManageAble implements Comparable<Banco
 	 * @author Fagner Oliveida da Silva
 	 */
 
-	public BancoDeDados(ServicoDeBD servico, String nome) {
+	public BancoDeDados(Instancia servico, String nome) {
 		this(nome);
 		this.servico = servico;
 		this.servico.adicionaCatalogo(this);
@@ -70,14 +70,14 @@ public class BancoDeDados extends CalendarManageAble implements Comparable<Banco
 	/**
 	 * @return the servico
 	 */
-	public ServicoDeBD getServico() {
+	public Instancia getServico() {
 		return servico;
 	}
 
 	/**
 	 * @param servico the servico to set
 	 */
-	public void setServico(ServicoDeBD servico) {
+	public void setServico(Instancia servico) {
 		atualiza();
 		this.servico = servico;
 	}

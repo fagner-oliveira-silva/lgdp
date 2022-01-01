@@ -7,6 +7,7 @@ import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -24,10 +25,11 @@ import org.hibernate.annotations.NamedQuery;
 import br.com.record.lgpd.exceptions.ViolacaoDeArgumentosDeInicializacaoDoConstrutor;
 
 @Entity
-@Table(name = "\"LGPD_INSTANCIA_SGBD\"", uniqueConstraints = @UniqueConstraint(columnNames = { "SERVIDOR",
+@Table(name = "\"LGPD_INSTANCIA\"", uniqueConstraints = @UniqueConstraint(columnNames = { "SERVIDOR",
 		"PORTA" }, name = "\"UNQ_SERVIDOR_PORTA\""))
-@NamedQuery(name = "ServicoDeBD.encontrePeloNome", query = "SELECT p FROM ServicoDeBD p WHERE p.nome = ?1")
-public class ServicoDeBD extends CalendarManageAble implements Comparable<ServicoDeBD>, Comparator<ServicoDeBD> {
+@NamedQuery(name = "Instancia.encontrePeloNome", query = "SELECT p FROM Instancia p WHERE p.nome = ?1")
+@NamedQuery(name = "Instancia.encontrePeloNomeOuPortaOuIp", query = "SELECT a FROM Instancia a INNER JOIN Servidor b ON a.servidor  = b.id INNER JOIN EnderecoIp c ON b.enderecoIp = c.id  WHERE a.nome = ?1 or a.porta = ?2 or (c.primeiroOcteto = ?3 and c.segundoOcteto = ?4 and c.terceiroOcteto = ?5 and c.quartoOcteto = ?6)")
+public class Instancia extends CalendarManageAble implements Comparable<Instancia>, Comparator<Instancia> {
 
 	/**
 	 *
@@ -48,12 +50,13 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "ID_ENUM_SGBD", nullable = false, referencedColumnName = "ID", foreignKey = @ForeignKey(name = "FK_ID_TIPO_SGBD"))
 	@Enumerated(EnumType.ORDINAL)
+	@Convert(converter = EnumSGBDConverter.class)
 	private EnumSGBD sgbdEnum;
 
 	@OneToMany(mappedBy = "servico", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Collection<BancoDeDados> catalogo;
 
-	public ServicoDeBD() {
+	public Instancia() {
 		super();
 		catalogo = new TreeSet<BancoDeDados>();
 	}
@@ -63,7 +66,7 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 	 * @param porta <b> - número da porta do serviço.
 	 * @param sgbd  <b> - Tipo de banco de dados usado.
 	 */
-	public ServicoDeBD(String nome, String porta, EnumSGBD sgbd)
+	public Instancia(String nome, String porta, EnumSGBD sgbd)
 			throws ViolacaoDeArgumentosDeInicializacaoDoConstrutor {
 		this();
 		ArrayList<String> argumentos = new ArrayList<String>();
@@ -81,7 +84,7 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 			this.porta = porta;
 			this.sgbdEnum = sgbd;
 		} else {
-			throw new ViolacaoDeArgumentosDeInicializacaoDoConstrutor(argumentos, ServicoDeBD.class);
+			throw new ViolacaoDeArgumentosDeInicializacaoDoConstrutor(argumentos, Instancia.class);
 		}
 	}
 
@@ -91,7 +94,7 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 	 * @param servidor <b> - Instancia da classe do ServidorResource.
 	 * @param sgbd     <b> - Tipo de banco de dados usado.
 	 */
-	public ServicoDeBD(String nome, String porta, Servidor servidor, EnumSGBD sgbd)
+	public Instancia(String nome, String porta, Servidor servidor, EnumSGBD sgbd)
 			throws ViolacaoDeArgumentosDeInicializacaoDoConstrutor {
 		this(nome, porta, sgbd);
 		ArrayList<String> argumentos = new ArrayList<String>();
@@ -102,7 +105,7 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 			this.servidor = servidor;
 			servidor.adicionaServico(this);
 		} else {
-			throw new ViolacaoDeArgumentosDeInicializacaoDoConstrutor(argumentos, ServicoDeBD.class);
+			throw new ViolacaoDeArgumentosDeInicializacaoDoConstrutor(argumentos, Instancia.class);
 		}
 	}
 
@@ -195,9 +198,9 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof ServicoDeBD))
+		if (!(obj instanceof Instancia))
 			return false;
-		ServicoDeBD other = (ServicoDeBD) obj;
+		Instancia other = (Instancia) obj;
 		if (catalogo == null) {
 			if (other.catalogo != null)
 				return false;
@@ -241,12 +244,12 @@ public class ServicoDeBD extends CalendarManageAble implements Comparable<Servic
 	}
 
 	@Override
-	public int compare(ServicoDeBD o1, ServicoDeBD o2) {
+	public int compare(Instancia o1, Instancia o2) {
 		return o1.hashCode() - o2.hashCode();
 	}
 
 	@Override
-	public int compareTo(ServicoDeBD servico) {
+	public int compareTo(Instancia servico) {
 		int retorno = 0;
 		if (servico == null) {
 			retorno = -1;

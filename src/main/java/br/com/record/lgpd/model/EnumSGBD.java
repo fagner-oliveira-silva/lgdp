@@ -24,7 +24,7 @@ indexes = { @Index(name = "UNQ_NOME",  columnList="NOME", unique = true)}
 @NamedQuery(name = "EnumSGBD.encontrePeloNome", query = "SELECT p FROM EnumSGBD p WHERE p.nome = ?1")
 public enum EnumSGBD {
 	
-	SQLSERVER(1, "SqlServer"), ORACLE(2, "Oracle"), DBASE(3, "dBase"), ACCESS(4, "Access"), MYSQL(5, "MySql");
+	SQLSERVER(1, "SqlServer"), ORACLE(2, "Oracle"), DBASE(3, "dBase"), ACCESS(4, "Access"), MYSQL(5, "MySql"), INDEFINIDO(99,"Indefinido");
 
 	private long id;
 	private String nome;
@@ -50,5 +50,31 @@ public enum EnumSGBD {
 	public String toString() {
 		return nome;
 	}
-
+	
+	public EnumSGBD getEnumSGBDFromId( int id) {
+		EnumSGBD retorno = null;
+		switch (id) {
+		case 1:
+			retorno = SQLSERVER;
+			break;
+		case 2:
+			retorno = ORACLE;
+			break;
+		case 3:
+			retorno = DBASE;
+			break;
+		case 4:
+			retorno = ACCESS;
+			break;
+		case 5:
+			retorno = MYSQL;
+			break;
+		case 99:
+			retorno = INDEFINIDO;
+			break;
+		default:
+			break;
+		}
+		return retorno;
+	}
 }

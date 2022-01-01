@@ -4,17 +4,20 @@ import java.io.IOException;
 
 import br.com.record.lgpd.model.Aplicacao;
 import br.com.record.lgpd.model.BancoDeDados;
+import br.com.record.lgpd.model.EnderecoIp;
 import br.com.record.lgpd.model.EnumSGBD;
-import br.com.record.lgpd.model.ServicoDeBD;
+import br.com.record.lgpd.model.Instancia;
 import br.com.record.lgpd.model.Servidor;
 
 public class App {
 	
 	public static void main(final String[] args) {
 
-		final Servidor serverdb = new Servidor("DBSERVER", "192.168.0.37");
+		String strIp = "192.168.0.37";
+		EnderecoIp ip = new EnderecoIp(strIp);
+		final Servidor serverdb = new Servidor("DBSERVER", ip);
 		//ServicoDeBD sqlServer = new ServicoDeBD("RECORD", "51086", serverdb, new TipoSGBDPersist(EnumSGBD.SQLSERVER) );
-		ServicoDeBD sqlServer = new ServicoDeBD("RECORD", "51086", serverdb, EnumSGBD.SQLSERVER );
+		Instancia sqlServer = new Instancia("RECORD", "51086", serverdb, EnumSGBD.SQLSERVER );
 		final BancoDeDados bdP12 = new BancoDeDados(sqlServer, "P12");
 		final BancoDeDados bdIntegracao = new BancoDeDados(sqlServer, "INTEGRACAO");
 		final BancoDeDados bdGer = new BancoDeDados(sqlServer, "GER");
